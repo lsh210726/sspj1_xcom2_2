@@ -4,6 +4,7 @@
 #include "RoadTile.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values
@@ -14,11 +15,11 @@ ARoadTile::ARoadTile()
 
 	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Collider"));
 	SetRootComponent(boxComp);
-	boxComp->SetBoxExtent(FVector(tileSize, tileSize, tileSize)); //set bocComp extent
+	boxComp->SetBoxExtent(FVector(80)); //set bocComp extent
 
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
-	meshComp->SetWorldScale3D(FVector(2, 2, 2));
+	meshComp->SetWorldScale3D(FVector(1.6));
 	ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Script/Engine.MaterialInstanceConstant'/Game/Art/M_TileWalk.M_TileWalk'"));//set mesh material
 	if (Material.Succeeded())
 	{
@@ -48,12 +49,16 @@ void ARoadTile::BeginPlay()
 	//startLoc = GetActorLocation();
 	//SetActorLocation(FVector(1000, 1000, 1000));
 	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ARoadTile::StartMoving, 0.2f, false);
+
+
 }
 
 // Called every frame
 void ARoadTile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
 
 }
 
@@ -65,20 +70,25 @@ void ARoadTile::OnTileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	//	meshComp->SetMaterial(0, Material.Object);
 	//}
 
-	UE_LOG(LogTemp, Log, TEXT("%s overlapped!!"), *OtherComp->GetName());
-
+	UE_LOG(LogTemp, Log, TEXT("%s overlapped by %s"), *GetName(), *OtherActor->GetName());
+	tileColor = FColor::Orange;
 	isCanWalkTile = false;
+	overlapActor = OtherActor;
+
+	//DrawDebugBox(GetWorld(), GetActorLocation(), FVector(tileSize, tileSize, tileSize), tileColor, true, 1, 0, 10);
+
 }
 
 void ARoadTile::OnTileEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	UE_LOG(LogTemp, Log, TEXT("%s Overlap End!!"), *GetName());
+	tileColor = FColor::Blue;
 	isCanWalkTile = true;
+	overlapActor = nullptr;
 }
 
 void ARoadTile::StartMoving()
 {
 	SetActorLocation(startLoc);
 }
-
 

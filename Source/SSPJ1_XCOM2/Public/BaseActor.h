@@ -24,6 +24,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void FindCover();//¾öÆó¹° Ã£±â
+
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
 
@@ -45,4 +47,10 @@ public:
 	bool inMoving=false;
 	bool hasPath=false;
 	int32 currentWayPointIndex=0;
+
+	float counter=0.0f;
+
+	TArray<ARoadTile*> coverTileList;
+	TArray<ARoadTile*> coverLocationTileList;
+
 };

@@ -46,4 +46,10 @@ public:
 
 	FVector startLoc;
 
+	FColor tileColor = FColor::Blue;
+
+	AActor* overlapActor; // 오버랩된 액터 포인터
+
+	int32 tileRow;
+	int32 tileCol;
 };

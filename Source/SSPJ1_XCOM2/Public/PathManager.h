@@ -49,4 +49,6 @@ public:
 	TArray<FVector> AStarPathFinding();
 
 	TArray<FVector> pathArray;
+
+	void RoadTileRePosition(FVector center);
 };

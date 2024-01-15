@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PathManager.h"
@@ -36,7 +36,7 @@ void APathManager::Tick(float DeltaTime)
 
 }
 
-void APathManager::RoadTileMake()//world road tile make //±æÃ£±â À§ÇÑ À§Ä¡ Å¸ÀÏ »ı¼ºÇÏ±â 10*10
+void APathManager::RoadTileMake()//world road tile make //ê¸¸ì°¾ê¸° ìœ„í•œ ìœ„ì¹˜ íƒ€ì¼ ìƒì„±í•˜ê¸° 10*10
 {
 	for (int i = 0; i < ROW; i++)
 	{
@@ -45,12 +45,14 @@ void APathManager::RoadTileMake()//world road tile make //±æÃ£±â À§ÇÑ À§Ä¡ Å¸ÀÏ 
 		int32 tileSize = 0;
 		for (int j = 0; j < COL; j++)
 		{
-			//³ªÁß¿¡ ¹Ú½º Æ®·¹ÀÌ½º·Î Ãæµ¹ ÆÇÁ¤ ÈÄ ÇØ´ç °æ·Î Àå¾Ö¹° ÀÖ´ÂÁö ÆÇÁ¤ È®ÀÎ ¿ä¸Á
+			//ë‚˜ì¤‘ì— ë°•ìŠ¤ íŠ¸ë ˆì´ìŠ¤ë¡œ ì¶©ëŒ íŒì • í›„ í•´ë‹¹ ê²½ë¡œ ì¥ì• ë¬¼ ìˆëŠ”ì§€ íŒì • í™•ì¸ ìš”ë§
 			ARoadTile* RT = GetWorld()->SpawnActor<ARoadTile>(roadTileFactory, FVector(0,0,0),FRotator(0,0,0));
 			RT->SetActorLocation(FVector(iX, iY, tileSize),true);
 			RA1.Add(RT);
 			tileSize = RT->tileSize;
 			iX += tileSize*2;
+			RT->tileRow = i;
+			RT->tileCol = j;
 		}
 		RoadTileArray.Add(RA1);
 		iY += tileSize*2;
@@ -74,6 +76,30 @@ void APathManager::RoadTileMake()//world road tile make //±æÃ£±â À§ÇÑ À§Ä¡ Å¸ÀÏ 
 	//}
 }
 
+void APathManager::RoadTileRePosition(FVector center)//ë¡œë“œíƒ€ì¼ ì¬ë°°ì¹˜
+{
+	int tileSize1=0;
+	if (RoadTileArray[0][0] != nullptr)
+	{
+		iX = center.X - (RoadTileArray[0][0]->tileSize * 2 * COL / 2); //ì•¡í„°ì˜ xìœ„ì¹˜ â€“ (íƒ€ì¼ì˜ ë°˜ì§€ë¦„ * 2 * ì „ì²´ íƒ€ì¼ ì—´ / 2)
+		iY = center.Y - (RoadTileArray[0][0]->tileSize * 2 * ROW / 2);
+		tileSize1 = RoadTileArray[0][0]->tileSize;
+		UE_LOG(LogTemp, Warning, TEXT("RoadTile RePosition Start Location : iX->%d, iY->%d"), iX, iY);
+	}
+	int ixTemp = iX;//ì²˜ìŒ iXìœ„ì¹˜ ì €ì¥ ì„ì‹œ ë³€ìˆ˜
+	for (auto RA2 : RoadTileArray)
+	{
+		for (auto RT2 : RA2)
+		{
+			RT2->SetActorLocation(FVector(iX, iY, tileSize1), true);
+			iX += tileSize1 * 2;
+		}
+		iY += tileSize1 * 2;
+		iX = ixTemp;
+	}
+
+}
+
 TArray<FVector> APathManager::AStarPathFinding()
 {
 	int grid[10][10];
@@ -84,7 +110,6 @@ TArray<FVector> APathManager::AStarPathFinding()
 			if (RoadTileArray[i][j] != nullptr)
 			{
 				grid[i][j] = RoadTileArray[i][j]->isCanWalkTile;
-				UE_LOG(LogTemp, Log, TEXT("%d"), grid[i][j]);
 			}
 		}
 	}
@@ -94,11 +119,11 @@ TArray<FVector> APathManager::AStarPathFinding()
 		FString rowString;
 
 		for (int j = 0; j < 10; j++) {
-			// °¢ ¿­ÀÇ °ªÀ» rowString¿¡ Ãß°¡ÇÕ´Ï´Ù.
+			// ê° ì—´ì˜ ê°’ì„ rowStringì— ì¶”ê°€í•©ë‹ˆë‹¤.
 			rowString += FString::Printf(TEXT("%d, "), grid[i][j]);
 		}
 
-		// °¢ ÇàÀÇ ¸¶Áö¸·¿¡¼­ ·Î±×¸¦ Ãâ·ÂÇÕ´Ï´Ù. ÀÌ·² °æ¿ì, °¢ ÇàÀÌ º°µµÀÇ ·Î±× ¸Ş½ÃÁö·Î Ãâ·ÂµË´Ï´Ù.
+		// ê° í–‰ì˜ ë§ˆì§€ë§‰ì—ì„œ ë¡œê·¸ë¥¼ ì¶œë ¥í•©ë‹ˆë‹¤. ì´ëŸ´ ê²½ìš°, ê° í–‰ì´ ë³„ë„ì˜ ë¡œê·¸ ë©”ì‹œì§€ë¡œ ì¶œë ¥ë©ë‹ˆë‹¤.
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *rowString);
 	}
 
@@ -109,14 +134,14 @@ TArray<FVector> APathManager::AStarPathFinding()
 	PathFind(grid, src, dest);
 	stack<Pair> pathStackCopy = pathStack;
 
-	while (!pathStack.empty()) {//°æ·ÎÀúÀå½ºÅÃÀÌ ºô ¶§±îÁö ³»ºÎ °ª Ãâ·ÂÇÏ±â
+	while (!pathStack.empty()) {//ê²½ë¡œì €ì¥ìŠ¤íƒì´ ë¹Œ ë•Œê¹Œì§€ ë‚´ë¶€ ê°’ ì¶œë ¥í•˜ê¸°
 		pair<int, int> p = pathStack.top();
 		pathStack.pop();
 		UE_LOG(LogTemp, Warning,TEXT("-> (%d,%d) "), p.first, p.second);
 		DrawDebugSphere(GetWorld(), RoadTileArray[p.first][p.second]->GetActorLocation(), 100, 8, FColor(181, 0, 0), true, -1, 0, 2);
 	}
 
-	while (!pathStackCopy.empty()) {//°æ·ÎÀúÀå½ºÅÃÀÌ ºô ¶§±îÁö ³»ºÎ °ª Ãâ·ÂÇÏ±â
+	while (!pathStackCopy.empty()) {//ê²½ë¡œì €ì¥ìŠ¤íƒì´ ë¹Œ ë•Œê¹Œì§€ ë‚´ë¶€ ê°’ ì¶œë ¥í•˜ê¸°
 		pair<int, int> p = pathStackCopy.top();
 		pathStackCopy.pop();
 		pathArray.Emplace(RoadTileArray[p.first][p.second]->GetActorLocation());
