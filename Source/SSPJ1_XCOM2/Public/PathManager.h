@@ -46,7 +46,7 @@ public:
 	int32 COL = 10;
 
 	UFUNCTION()
-	TArray<FVector> AStarPathFinding();
+	TArray<FVector> AStarPathFinding(int destRow, int destCol);
 
 	TArray<FVector> pathArray;
 

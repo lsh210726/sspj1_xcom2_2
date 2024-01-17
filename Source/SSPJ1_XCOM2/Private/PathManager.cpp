@@ -98,9 +98,10 @@ void APathManager::RoadTileRePosition(FVector center)//로드타일 재배치
 		iX = ixTemp;
 	}
 
+
 }
 
-TArray<FVector> APathManager::AStarPathFinding()
+TArray<FVector> APathManager::AStarPathFinding(int destRow, int destCol)
 {
 	int grid[10][10];
 	for (int i = 0; i < 10; i++)
@@ -127,9 +128,9 @@ TArray<FVector> APathManager::AStarPathFinding()
 		UE_LOG(LogTemp, Warning, TEXT("%s"), *rowString);
 	}
 
-	Pair src = make_pair(0, 0);
+	Pair src = make_pair(ROW/2, COL/2);//출발지
 
-	Pair dest = make_pair(9, 9);
+	Pair dest = make_pair(destRow, destCol);//도착지
 
 	PathFind(grid, src, dest);
 	stack<Pair> pathStackCopy = pathStack;

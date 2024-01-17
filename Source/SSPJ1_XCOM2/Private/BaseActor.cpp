@@ -10,6 +10,7 @@
 #include <utility>
 
 
+
 // Sets default values
 ABaseActor::ABaseActor()
 {
@@ -30,8 +31,9 @@ void ABaseActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseActor::PathFind, 0.2f, false);
+	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseActor::PathFind, 0.2f, false);
 	//PathFind();
+	FindPathMananger();
 
 	FTimerHandle GravityTimerHandle;
 	float GravityTime=3;
@@ -39,9 +41,10 @@ void ABaseActor::BeginPlay()
 	GetWorld()->GetTimerManager().SetTimer(GravityTimerHandle, FTimerDelegate::CreateLambda([&]()
 		{
 			// 코드 구현
-			UE_LOG(LogTemp, Warning, TEXT("RoadTileRePositionStart!!!!!!!!!!"));
-			pathManager->RoadTileRePosition(GetActorLocation());
-			FindCover();
+			pathManager->RoadTileRePosition(GetActorLocation());//타일 재배치
+			std::pair<int,int> coverRowCol = FindCover();//타겟을 찾고 해당 타겟에 대한 엄폐위치를 찾는다
+			PathFind(coverRowCol.first,coverRowCol.second);//엄폐위치로 이동한다
+			//UE_LOG(LogTemp, Log, TEXT("cover row : %d, cover col : %d"), coverRowCol.first, coverRowCol.second);
 			// TimerHandle 초기화
 			GetWorld()->GetTimerManager().ClearTimer(GravityTimerHandle);
 		}), GravityTime, false);
@@ -69,28 +72,25 @@ void ABaseActor::Tick(float DeltaTime)
 	//		currentWayPointIndex++;
 	//	}
 	//}
+
+	if (move) PathTracking(DeltaTime);
 }
 
-void ABaseActor::PathFind()//a*알고리즘을 활용한 길찾기 a* path find
+void ABaseActor::PathFind(int row, int col)//a*알고리즘을 활용한 길찾기 a* path find
 {
 	UE_LOG(LogTemp, Log, TEXT("path find start!"));
-	//find pathmanager
-	for (TActorIterator<APathManager> pm(GetWorld()); pm; ++pm)
-	{
-		//UE_LOG(LogTemp, Log, TEXT("PathMananger nale : %s"), *pm->GetName());
-		pathManager = *pm;
-	}
 
 	//SetActorLocation(pathManager->RoadTileArray[0][0]->GetActorLocation());
-	paths = pathManager->AStarPathFinding();//바닥 배열화 테스트
+	paths = pathManager->AStarPathFinding(row,col);//바닥 배열화 테스트
 	hasPath = true;
+	move = true;
 	for (FVector V : paths)
 	{
 
 	}
 }
 
-void ABaseActor::FindCover()
+std::pair<int, int> ABaseActor::FindCover()
 {
 	UE_LOG(LogTemp, Log, TEXT("Find Cover"));
 	if (pathManager != nullptr)
@@ -115,56 +115,133 @@ void ABaseActor::FindCover()
 		{
 			int32 row = i->tileRow;
 			int32 col = i->tileCol;
-			if (RTA[row-1][col]!=nullptr&&RTA[row-1][col]->isCanWalkTile)
+			if (row-1>=0&&col-1>=0&&row+1<=RTA.Num()&&col+1<=RTA[0].Num() && RTA[row-1][col]!=nullptr&&RTA[row-1][col]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row - 1][col]);
 			}
-			if (RTA[row - 1][col-1] != nullptr && RTA[row - 1][col-1]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row - 1][col-1] != nullptr && RTA[row - 1][col-1]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row - 1][col-1]);
 			}
-			if (RTA[row - 1][col+1] != nullptr && RTA[row - 1][col+1]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row - 1][col+1] != nullptr && RTA[row - 1][col+1]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row - 1][col+1]);
 			}
-			if (RTA[row][col-1] != nullptr && RTA[row][col-1]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row][col-1] != nullptr && RTA[row][col-1]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row][col-1]);
 			}
-			if (RTA[row][col + 1] != nullptr && RTA[row][col + 1]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row][col + 1] != nullptr && RTA[row][col + 1]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row][col + 1]);
 			}
-			if (RTA[row+1][col - 1] != nullptr && RTA[row+1][col - 1]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row+1][col - 1] != nullptr && RTA[row+1][col - 1]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row+1][col - 1]);
 			}
-			if (RTA[row + 1][col] != nullptr && RTA[row + 1][col]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row + 1][col] != nullptr && RTA[row + 1][col]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row + 1][col]);
 			}
-			if (RTA[row + 1][col + 1] != nullptr && RTA[row + 1][col + 1]->isCanWalkTile)
+			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row + 1][col + 1] != nullptr && RTA[row + 1][col + 1]->isCanWalkTile)
 			{
 				coverLocationTileList.Emplace(RTA[row + 1][col + 1]);
 			}
 		}
 
+		AActor* target = FindClosestTarget();
+
 		for (auto i : coverLocationTileList)//엄폐물 주변 타일과 타깃 사이 공격 되는 타일들 제거
 		{
 			FHitResult hr;
-			if (!GetWorld()->LineTraceSingleByProfile(hr, FVector(0), i->GetActorLocation(), TEXT("Attack")))
+			if (!GetWorld()->LineTraceSingleByProfile(hr, target->GetActorLocation(), i->GetActorLocation(), TEXT("Attack")))
 			{
 				//UE_LOG(LogTemp, Log, TEXT("Line trace hit!"));
-				coverLocationTileList.Remove(i);
+				//coverLocationTileList.Remove(i);
+				i = nullptr;
+				//DrawDebugLine(GetWorld(), target->GetActorLocation(), i->GetActorLocation(), FColor::Emerald, true, 1, 0, 10);
 			};
 		}
 
 		for (auto i : coverLocationTileList)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("%s"),  *i->GetName());
-			DrawDebugSphere(GetWorld(), i->GetActorLocation(), 100, 8, FColor::Purple, true, -1, 0, 2);
+			if (i != nullptr) DrawDebugSphere(GetWorld(), i->GetActorLocation(), 100, 8, FColor::Purple, true, -1, 0, 2);
+		}
 
+		float closestDist=999;
+		std::pair<int, int> closestTile;
+		UE_LOG(LogTemp, Log, TEXT("Target Name : %s, Target Location : %f, %f @@@@@@@@@@@@@@@"),*target->GetName(), target->GetActorLocation().X, target->GetActorLocation().Y);
+
+		for (auto i : coverLocationTileList)
+		{
+			UE_LOG(LogTemp, Log, TEXT("row : %d, col : %d, dist : %f"),i->tileRow, i->tileCol, target->GetDistanceTo(i));
+			if (target->GetDistanceTo(i) <= closestDist)
+			{
+				closestDist = target->GetDistanceTo(i);
+				closestTile.first = i->tileRow;
+				closestTile.second = i->tileCol;
+				UE_LOG(LogTemp, Warning, TEXT("row : %d, col : %d, dist : %f"), closestTile.first, closestTile.second, closestDist);
+			}
+		}
+
+		return closestTile;//가장 적과 가까운 엄폐 위치
+	}
+	return std::make_pair(99, 99);
+}
+
+void ABaseActor::PathTracking(float DeltaTime)
+{
+	if (currentWayPointIndex + 1 > paths.Num())
+	{
+		move = false;
+	}
+	else if (paths.Num() > 0 && currentWayPointIndex+1<=paths.Num())
+	{
+		// Get the current waypoint
+		FVector Waypoint = paths[currentWayPointIndex];
+
+		// Move the actor towards the waypoint
+		FVector NewLocation = FMath::VInterpConstantTo(GetActorLocation(), Waypoint, DeltaTime, 300.0f);
+		SetActorLocation(NewLocation);
+
+		// If the actor is close to the waypoint, move to the next waypoint
+		if (FVector::Distance(NewLocation, Waypoint) < 10.0f)
+		{
+			//currentWayPointIndex = (currentWayPointIndex + 1) % paths.Num();
+			currentWayPointIndex++;
 		}
 	}
 }
 
+AActor* ABaseActor::FindClosestTarget()
+{
+	float clostDist = 999;
+	AActor* clostActor = this;
+	UE_LOG(LogTemp, Log, TEXT("find closest target"));
+	for (TActorIterator<AActor> a(GetWorld()); a; ++a)
+	{
+		if (a->GetName().Contains(TEXT("TestPlayer")))//상대방 이름
+		{
+			if (GetDistanceTo(*a) <= clostDist)
+			{
+				clostDist = GetDistanceTo(*a);
+				clostActor = *a;
+			}
+			UE_LOG(LogTemp, Log, TEXT("%s"), *a->GetName());
+			//UE_LOG(LogTemp, Log, TEXT("%s"), **clostActor->GetName());
+			return *a;
+		}
+	}
+	return nullptr;
+}
+
+void ABaseActor::FindPathMananger()
+{
+	//find pathmanager
+	for (TActorIterator<APathManager> pm(GetWorld()); pm; ++pm)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("PathMananger nale : %s"), *pm->GetName());
+		pathManager = *pm;
+	}
+}

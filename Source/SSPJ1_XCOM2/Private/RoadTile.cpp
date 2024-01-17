@@ -70,7 +70,7 @@ void ARoadTile::OnTileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 	//	meshComp->SetMaterial(0, Material.Object);
 	//}
 
-	UE_LOG(LogTemp, Log, TEXT("%s overlapped by %s"), *GetName(), *OtherActor->GetName());
+	//UE_LOG(LogTemp, Log, TEXT("%s overlapped by %s"), *GetName(), *OtherActor->GetName());
 	tileColor = FColor::Orange;
 	isCanWalkTile = false;
 	overlapActor = OtherActor;
@@ -81,7 +81,7 @@ void ARoadTile::OnTileOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 
 void ARoadTile::OnTileEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	UE_LOG(LogTemp, Log, TEXT("%s Overlap End!!"), *GetName());
+	//UE_LOG(LogTemp, Log, TEXT("%s Overlap End!!"), *GetName());
 	tileColor = FColor::Blue;
 	isCanWalkTile = true;
 	overlapActor = nullptr;

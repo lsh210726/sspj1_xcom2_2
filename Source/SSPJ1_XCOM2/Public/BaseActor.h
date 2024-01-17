@@ -24,7 +24,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void FindCover();//决企拱 茫扁
+	std::pair<int, int> FindCover();//决企拱 茫扁
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
@@ -32,7 +32,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
 
-	void PathFind();
+	UFUNCTION()
+	void PathFind(int row, int col);
+
+	UFUNCTION()
+	void PathTracking(float DeltaTime);
+
+	UFUNCTION()
+	AActor* FindClosestTarget();
+
+	UFUNCTION()
+	void FindPathMananger();
 
 	TArray<ARoadTile*> openList;
 	TArray<ARoadTile*> closeList;
@@ -53,4 +63,5 @@ public:
 	TArray<ARoadTile*> coverTileList;
 	TArray<ARoadTile*> coverLocationTileList;
 
+	bool move;
 };
