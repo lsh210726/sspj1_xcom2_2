@@ -50,9 +50,11 @@ public:
 	void FindPathMananger();
 
 	UFUNCTION()
-	void moveLocationFinder();
+	void moveLocationFinder(int destRow, int destCol);
 
 	void MoveToLocation(int grid1[20][20], std::pair<int,int> src, std::pair<int,int> dest);
+
+	std::pair<int,int> findCoverLocation();
 
 	TArray<TArray<FVector>> moveLocationArr;
 

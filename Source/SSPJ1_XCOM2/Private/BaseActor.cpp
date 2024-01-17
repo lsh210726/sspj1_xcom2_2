@@ -39,7 +39,9 @@ void ABaseActor::BeginPlay()
 	//PathFind();
 	//FindPathMananger();
 
-	moveLocationFinder();
+	pair<int,int> pp = findCoverLocation();
+
+	moveLocationFinder(pp.first,pp.second);
 
 	FTimerHandle GravityTimerHandle;
 	float GravityTime=3;
@@ -205,7 +207,7 @@ void ABaseActor::PathTracking(float DeltaTime)
 
 AActor* ABaseActor::FindClosestTarget()
 {
-	float clostDist = 999;
+	float clostDist = 9999;
 	AActor* clostActor = this;
 	UE_LOG(LogTemp, Log, TEXT("find closest target"));
 	for (TActorIterator<AActor> a(GetWorld()); a; ++a)
@@ -235,7 +237,7 @@ void ABaseActor::FindPathMananger()
 	}
 }
 
-void ABaseActor::moveLocationFinder()
+void ABaseActor::moveLocationFinder(int destRow, int destCol)
 {
 	//0,0 위치 찾기
 	float x, y, z;
@@ -279,7 +281,18 @@ void ABaseActor::moveLocationFinder()
 		moveLocationArr.Emplace(va);
 	}
 
-	MoveToLocation(mapGrid, make_pair(ROW / 2, COL / 2), make_pair(ROW, COL));
+	for (auto i : moveLocationArr)
+	{
+		for (auto j : i)
+		{
+			//UE_LOG(LogTemp, Log, TEXT("%f, %f, %f"), j.X, j.Y, j.Z);
+		}
+	}
+
+	DrawDebugSphere(GetWorld(), moveLocationArr[destRow][destCol], 100, 8, FColor::Green, true, -1, 0, 2);
+	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@@@@@@@@@@@@@ : %f,%f,%f, %d"), moveLocationArr[destRow][destCol].X, moveLocationArr[destRow][destCol].Y, moveLocationArr[destRow][destCol].Z, mapGrid[destRow][destCol]);
+
+	MoveToLocation(mapGrid, make_pair(ROW / 2, COL / 2), make_pair(destRow, destCol));
 
 }
 
@@ -291,5 +304,72 @@ void ABaseActor::MoveToLocation(int grid1[20][20], std::pair<int, int> src, std:
 		pair<int, int> p = pathStack.top();
 		pathStack.pop();
 		UE_LOG(LogTemp, Warning, TEXT("-> (%d,%d) "), p.first, p.second);
+		paths.Emplace(moveLocationArr[p.first][p.second]);
 	}
+	if (pathStack.empty())move = true;
+}
+
+pair<int,int> ABaseActor::findCoverLocation()
+{
+	//0,0 위치 찾기
+	float x, y, z;
+	x = GetActorLocation().X - (20 / 2 * 100 * 2);
+	y = GetActorLocation().Y - (20 / 2 * 100 * 2);
+	z = GetActorLocation().Z;
+
+	int mapGrid[20][20];
+
+	for (int i = 0; i < ROW; i++)
+	{
+		TArray<FVector> va;
+		for (int j = 0; j < COL; j++)
+		{
+			va.Emplace(FVector(x + (100 * 2 * i), y + (100 * 2 * j), z));
+
+			FHitResult hr;
+
+			bool bIsHit = GetWorld()->SweepSingleByProfile(
+				hr,
+				FVector(x + (100 * 2 * i), y + (100 * 2 * j), z),
+				FVector(x + (100 * 2 * i), y + (100 * 2 * j), z),
+				FQuat::Identity,
+				TEXT("Pawn"),
+				FCollisionShape::MakeBox(FVector(100)),
+				FCollisionQueryParams(SCENE_QUERY_STAT(SweepSingle), true)
+			);
+
+			if (bIsHit && !hr.GetActor()->GetName().Contains(TEXT("BaseActor")))
+			{
+				mapGrid[i][j] = 0;//장애물
+			}
+			else
+			{
+				mapGrid[i][j] = 1;//길
+			}
+		}
+		moveLocationArr.Emplace(va);
+	}
+
+	AActor* target = FindClosestTarget();
+	int xx, yy;
+	double distance2Target=9999;
+	for (int i = 0; i < ROW; i++)
+	{
+		for (int j = 0; j < COL; j++)
+		{
+			FHitResult hr;
+			if (mapGrid[i][j]==1 && GetWorld()->LineTraceSingleByProfile(hr, target->GetActorLocation(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), TEXT("Attack")))
+			{
+				double distance = (target->GetActorLocation() - FVector(x + (100 * 2 * i), y + (100 * 2 * j), z)).Size();
+				if (distance < distance2Target)
+				{
+					distance2Target = distance;
+					xx = i, yy = j;
+				}
+			};
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("find cover location : %d,%d"), xx, yy);
+
+	return make_pair(xx, yy);
 }
