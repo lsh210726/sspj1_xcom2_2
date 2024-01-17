@@ -7,4 +7,4 @@ extern std::stack<Pair> pathStack;
 //std::stack<Pair> pathStack;
 
 
-void PathFind(int grid[10][10], Pair src, Pair dest);
+void PathFind(int grid[20][20], Pair src, Pair dest);

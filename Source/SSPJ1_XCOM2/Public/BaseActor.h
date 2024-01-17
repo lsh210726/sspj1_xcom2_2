@@ -32,8 +32,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
 
-	UFUNCTION()
-	void PathFind(int row, int col);
+	UPROPERTY(EditAnywhere)
+	int ROW = 20;
+	UPROPERTY(EditAnywhere)
+	int COL = 20;
+
+	//UFUNCTION()
+	//void PathFind(int row1, int col1);
 
 	UFUNCTION()
 	void PathTracking(float DeltaTime);
@@ -43,6 +48,13 @@ public:
 
 	UFUNCTION()
 	void FindPathMananger();
+
+	UFUNCTION()
+	void moveLocationFinder();
+
+	void MoveToLocation(int grid1[20][20], std::pair<int,int> src, std::pair<int,int> dest);
+
+	TArray<TArray<FVector>> moveLocationArr;
 
 	TArray<ARoadTile*> openList;
 	TArray<ARoadTile*> closeList;
