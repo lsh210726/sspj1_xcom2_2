@@ -34,29 +34,12 @@ ABaseActor::ABaseActor()
 void ABaseActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ABaseActor::PathFind, 0.2f, false);
-	//PathFind();
-	//FindPathMananger();
 
-	pair<int,int> pp = findCoverLocation();
+	//pair<int,int> pp = findCoverLocation();
 
-	moveLocationFinder(pp.first,pp.second);
+	//moveLocationFinder(pp.first,pp.second);
 
-	FTimerHandle GravityTimerHandle;
-	float GravityTime=3;
-
-	GetWorld()->GetTimerManager().SetTimer(GravityTimerHandle, FTimerDelegate::CreateLambda([&]()
-		{
-			// 코드 구현
-			//pathManager->RoadTileRePosition(GetActorLocation());//타일 재배치
-			//std::pair<int,int> coverRowCol = FindCover();//타겟을 찾고 해당 타겟에 대한 엄폐위치를 찾는다
-			//PathFind(coverRowCol.first,coverRowCol.second);//엄폐위치로 이동한다
-			//UE_LOG(LogTemp, Log, TEXT("cover row : %d, cover col : %d"), coverRowCol.first, coverRowCol.second);
-			// TimerHandle 초기화
-			GetWorld()->GetTimerManager().ClearTimer(GravityTimerHandle);
-		}), GravityTime, false);
-
+	//FindCoverNMove();
 }
 
 // Called every frame
@@ -66,120 +49,6 @@ void ABaseActor::Tick(float DeltaTime)
 
 	if (move) PathTracking(DeltaTime);
 }
-
-//void ABaseActor::PathFind(int row1, int col1)//a*알고리즘을 활용한 길찾기 a* path find
-//{
-//	UE_LOG(LogTemp, Log, TEXT("path find start!"));
-//
-//	//SetActorLocation(pathManager->RoadTileArray[0][0]->GetActorLocation());
-//	paths = pathManager->AStarPathFinding(row1,col1);//바닥 배열화 테스트
-//	hasPath = true;
-//	move = true;
-//	for (FVector V : paths)
-//	{
-//
-//	}
-//}
-
-//std::pair<int, int> ABaseActor::FindCover()
-//{
-//	UE_LOG(LogTemp, Log, TEXT("Find Cover"));
-//	if (pathManager != nullptr)
-//	{
-//		auto RTA = pathManager->RoadTileArray;
-//
-//		for (auto i : RTA)
-//		{
-//			for (auto j : i)
-//			{
-//				ABaseActor* ba = Cast<ABaseActor>(j->overlapActor);
-//				if (!j->isCanWalkTile&&!ba)//워크타일이 걸을수 없는 상태고 오버랩된 액터가 베이스액터가 아니라면 -> 엄폐물
-//				{
-//					UE_LOG(LogTemp, Log, TEXT("Cover tile Row = %d, Cover tile Col = %d"), j->tileRow, j->tileCol);
-//					DrawDebugSphere(GetWorld(), j->GetActorLocation(), 100, 8, FColor::Yellow, true, -1, 0, 2);
-//					coverTileList.Emplace(j);
-//				}
-//			}
-//		}
-//
-//		for (auto i : coverTileList)//엄폐물 주변 타일 저장
-//		{
-//			int32 row = i->tileRow;
-//			int32 col = i->tileCol;
-//			if (row-1>=0&&col-1>=0&&row+1<=RTA.Num()&&col+1<=RTA[0].Num() && RTA[row-1][col]!=nullptr&&RTA[row-1][col]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row - 1][col]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row - 1][col-1] != nullptr && RTA[row - 1][col-1]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row - 1][col-1]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row - 1][col+1] != nullptr && RTA[row - 1][col+1]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row - 1][col+1]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row][col-1] != nullptr && RTA[row][col-1]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row][col-1]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row][col + 1] != nullptr && RTA[row][col + 1]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row][col + 1]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row+1][col - 1] != nullptr && RTA[row+1][col - 1]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row+1][col - 1]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row + 1][col] != nullptr && RTA[row + 1][col]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row + 1][col]);
-//			}
-//			if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= RTA.Num() && col + 1 <= RTA[0].Num() && RTA[row + 1][col + 1] != nullptr && RTA[row + 1][col + 1]->isCanWalkTile)
-//			{
-//				coverLocationTileList.Emplace(RTA[row + 1][col + 1]);
-//			}
-//		}
-//
-//		AActor* target = FindClosestTarget();
-//
-//		for (auto i : coverLocationTileList)//엄폐물 주변 타일과 타깃 사이 공격 되는 타일들 제거
-//		{
-//			FHitResult hr;
-//			if (!GetWorld()->LineTraceSingleByProfile(hr, target->GetActorLocation(), i->GetActorLocation(), TEXT("Attack")))
-//			{
-//				//UE_LOG(LogTemp, Log, TEXT("Line trace hit!"));
-//				//coverLocationTileList.Remove(i);
-//				i = nullptr;
-//				//DrawDebugLine(GetWorld(), target->GetActorLocation(), i->GetActorLocation(), FColor::Emerald, true, 1, 0, 10);
-//			};
-//		}
-//
-//		for (auto i : coverLocationTileList)
-//		{
-//			//UE_LOG(LogTemp, Warning, TEXT("%s"),  *i->GetName());
-//			if (i != nullptr) DrawDebugSphere(GetWorld(), i->GetActorLocation(), 100, 8, FColor::Purple, true, -1, 0, 2);
-//		}
-//
-//		float closestDist=999;
-//		std::pair<int, int> closestTile;
-//		UE_LOG(LogTemp, Log, TEXT("Target Name : %s, Target Location : %f, %f @@@@@@@@@@@@@@@"),*target->GetName(), target->GetActorLocation().X, target->GetActorLocation().Y);
-//
-//		for (auto i : coverLocationTileList)
-//		{
-//			UE_LOG(LogTemp, Log, TEXT("row : %d, col : %d, dist : %f"),i->tileRow, i->tileCol, target->GetDistanceTo(i));
-//			if (target->GetDistanceTo(i) <= closestDist)
-//			{
-//				closestDist = target->GetDistanceTo(i);
-//				closestTile.first = i->tileRow;
-//				closestTile.second = i->tileCol;
-//				UE_LOG(LogTemp, Warning, TEXT("row : %d, col : %d, dist : %f"), closestTile.first, closestTile.second, closestDist);
-//			}
-//		}
-//
-//		return closestTile;//가장 적과 가까운 엄폐 위치
-//	}
-//	return std::make_pair(99, 99);
-//}
 
 void ABaseActor::PathTracking(float DeltaTime)
 {
@@ -219,23 +88,12 @@ AActor* ABaseActor::FindClosestTarget()
 				clostDist = GetDistanceTo(*a);
 				clostActor = *a;
 			}
-			UE_LOG(LogTemp, Log, TEXT("%s"), *a->GetName());
-			//UE_LOG(LogTemp, Log, TEXT("%s"), **clostActor->GetName());
 			return *a;
 		}
 	}
 	return nullptr;
 }
 
-void ABaseActor::FindPathMananger()
-{
-	//find pathmanager
-	for (TActorIterator<APathManager> pm(GetWorld()); pm; ++pm)
-	{
-		//UE_LOG(LogTemp, Log, TEXT("PathMananger nale : %s"), *pm->GetName());
-		pathManager = *pm;
-	}
-}
 
 void ABaseActor::moveLocationFinder(int destRow, int destCol)
 {
@@ -270,7 +128,7 @@ void ABaseActor::moveLocationFinder(int destRow, int destCol)
 
 			if (bIsHit && !hr.GetActor()->GetName().Contains(TEXT("BaseActor")))
 			{
-				DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Purple, true, -1, 0, 2);
+				//DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Purple, true, 1, 0, 2);
 				mapGrid[i][j] = 0;//장애물
 			}
 			else
@@ -281,16 +139,7 @@ void ABaseActor::moveLocationFinder(int destRow, int destCol)
 		moveLocationArr.Emplace(va);
 	}
 
-	for (auto i : moveLocationArr)
-	{
-		for (auto j : i)
-		{
-			//UE_LOG(LogTemp, Log, TEXT("%f, %f, %f"), j.X, j.Y, j.Z);
-		}
-	}
-
-	DrawDebugSphere(GetWorld(), moveLocationArr[destRow][destCol], 100, 8, FColor::Green, true, -1, 0, 2);
-	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@@@@@@@@@@@@@ : %f,%f,%f, %d"), moveLocationArr[destRow][destCol].X, moveLocationArr[destRow][destCol].Y, moveLocationArr[destRow][destCol].Z, mapGrid[destRow][destCol]);
+	//DrawDebugSphere(GetWorld(), moveLocationArr[destRow][destCol], 120, 8, FColor::Green, true, 1, 0, 2);
 
 	MoveToLocation(mapGrid, make_pair(ROW / 2, COL / 2), make_pair(destRow, destCol));
 
@@ -350,7 +199,7 @@ pair<int,int> ABaseActor::findCoverLocation()
 		moveLocationArr.Emplace(va);
 	}
 
-	AActor* target = FindClosestTarget();
+	target = FindClosestTarget();
 	int xx, yy;
 	double distance2Target=9999;
 	for (int i = 0; i < ROW; i++)
@@ -366,10 +215,24 @@ pair<int,int> ABaseActor::findCoverLocation()
 					distance2Target = distance;
 					xx = i, yy = j;
 				}
+				//UE_LOG(LogTemp, Log, TEXT("x : %f, y : %f, z : %f, dist : %f"), x + (100 * 2 * i), y + (100 * 2 * j), z, distance);
+				//DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Yellow, true, 1, 0, 2);
+
 			};
 		}
 	}
 	UE_LOG(LogTemp, Log, TEXT("find cover location : %d,%d"), xx, yy);
-
+	if (xx<-1 || xx>ROW || yy<-1 || yy>COL)//만약 숨을곳이 없다면
+	{
+		xx = ROW / 2, yy = COL / 2;
+		UE_LOG(LogTemp, Warning, TEXT("No Place To Cover!!!"));
+	}
 	return make_pair(xx, yy);
+}
+
+void ABaseActor::FindCoverNMove()
+{
+	pair<int, int> pp = findCoverLocation();
+	UE_LOG(LogTemp, Log, TEXT("dest : %d,%d"), pp.first, pp.second);
+	moveLocationFinder(pp.first, pp.second);
 }

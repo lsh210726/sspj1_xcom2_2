@@ -37,8 +37,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	int COL = 20;
 
-	//UFUNCTION()
-	//void PathFind(int row1, int col1);
+	UPROPERTY(BlueprintReadOnly)
+	AActor* target;
 
 	UFUNCTION()
 	void PathTracking(float DeltaTime);
@@ -47,14 +47,14 @@ public:
 	AActor* FindClosestTarget();
 
 	UFUNCTION()
-	void FindPathMananger();
-
-	UFUNCTION()
 	void moveLocationFinder(int destRow, int destCol);
 
 	void MoveToLocation(int grid1[20][20], std::pair<int,int> src, std::pair<int,int> dest);
 
 	std::pair<int,int> findCoverLocation();
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	void FindCoverNMove();
 
 	TArray<TArray<FVector>> moveLocationArr;
 
@@ -77,5 +77,6 @@ public:
 	TArray<ARoadTile*> coverTileList;
 	TArray<ARoadTile*> coverLocationTileList;
 
+	UPROPERTY(BlueprintReadOnly)
 	bool move;
 };
