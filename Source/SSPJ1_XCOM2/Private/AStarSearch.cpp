@@ -87,8 +87,8 @@
 using namespace std;
 
 //전체 격자공간의 크기
-#define ROW 10
-#define COL 10
+#define ROW 20
+#define COL 20
 
 // Creating a shortcut for int, int pair type
 //pair클래스는 두 객체를 하나의 객체로 취급 할 수 있게 묶어주는 클래스, STL에서 데이터 쌍을 표현할 때 사용, <utility>헤더
@@ -751,7 +751,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 
 
 
-void PathFind(int grid[10][10], Pair src, Pair dest)
+void PathFind(int grid[20][20], Pair src, Pair dest)
 {
     aStarSearch(grid, src, dest);
 }

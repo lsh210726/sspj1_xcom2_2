@@ -103,7 +103,7 @@ void APathManager::RoadTileRePosition(FVector center)//로드타일 재배치
 
 TArray<FVector> APathManager::AStarPathFinding(int destRow, int destCol)
 {
-	int grid[10][10];
+	int grid[20][20];
 	for (int i = 0; i < 10; i++)
 	{
 		for (int j = 0; j< 10; j++)
