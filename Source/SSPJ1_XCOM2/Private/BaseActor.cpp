@@ -81,7 +81,7 @@ AActor* ABaseActor::FindClosestTarget()
 	UE_LOG(LogTemp, Log, TEXT("find closest target"));
 	for (TActorIterator<AActor> a(GetWorld()); a; ++a)
 	{
-		if (a->GetName().Contains(TEXT("TestPlayer")))//상대방 이름
+		if (a->GetName().Contains(TEXT("BP_Player")))//상대방 이름
 		{
 			if (GetDistanceTo(*a) <= clostDist)
 			{
