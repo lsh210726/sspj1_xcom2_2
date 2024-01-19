@@ -10,6 +10,8 @@
 #include <utility>
 #include "Kismet/KismetSystemLibrary.h"
 #include "AStarSearch.h"
+#include "EnemyFSM.h"
+
 
 
 using namespace std;
@@ -27,6 +29,7 @@ ABaseActor::ABaseActor()
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
 
+	fsm = CreateDefaultSubobject<UEnemyFSM>(TEXT("FSM"));
 
 }
 
@@ -56,14 +59,35 @@ void ABaseActor::PathTracking(float DeltaTime)
 	{
 		move = false;
 	}
-	else if (paths.Num() > 0 && currentWayPointIndex+1<=paths.Num())
+	else if (paths.Num() > 0 && currentWayPointIndex + 1 <= paths.Num())
 	{
 		// Get the current waypoint
 		FVector Waypoint = paths[currentWayPointIndex];
 
 		// Move the actor towards the waypoint
 		FVector NewLocation = FMath::VInterpConstantTo(GetActorLocation(), Waypoint, DeltaTime, 300.0f);
+		//SetActorLocation(NewLocation);
+
+
+		// 액터의 현재 위치를 가져옵니다.
+		FVector CurrentLocation = GetActorLocation();
+
+		// 타겟 방향을 구하기 위해, 타겟 위치에서 현재 위치를 뺍니다.
+		FVector DirectionToTarget = (NewLocation - CurrentLocation).GetSafeNormal();
+
+		// DirectionToTarget 벡터를 바탕으로 새로운 회전값을 구합니다.
+		FRotator TargetRotation = DirectionToTarget.ToOrientationRotator();
+
+		float RotationSpeed = 15.0f;
+		FRotator CurrentRotation = GetActorRotation();
+		FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed);
+
+		// 액터의 회전을 새로운 회전값으로 설정합니다.
+		SetActorRotation(NewRotation);
+
 		SetActorLocation(NewLocation);
+
+
 
 		// If the actor is close to the waypoint, move to the next waypoint
 		if (FVector::Distance(NewLocation, Waypoint) < 10.0f)
@@ -128,7 +152,7 @@ void ABaseActor::moveLocationFinder(int destRow, int destCol)
 
 			if (bIsHit && !hr.GetActor()->GetName().Contains(TEXT("BaseActor")))
 			{
-				//DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Purple, true, 1, 0, 2);
+				//DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Purple, true, 1.0f, 0, 2);
 				mapGrid[i][j] = 0;//장애물
 			}
 			else
@@ -136,10 +160,11 @@ void ABaseActor::moveLocationFinder(int destRow, int destCol)
 				mapGrid[i][j] = 1;//길
 			}
 		}
-		moveLocationArr.Emplace(va);
+		//moveLocationArr.Emplace(va);
+		//UE_LOG(LogTemp, Log, TEXT("Im here %f %f %f, %f %f %f"), GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z, moveLocationArr[ROW / 2][COL / 2].X, moveLocationArr[ROW / 2][COL / 2].Y, moveLocationArr[ROW / 2][COL / 2].Z);
 	}
 
-	//DrawDebugSphere(GetWorld(), moveLocationArr[destRow][destCol], 120, 8, FColor::Green, true, 1, 0, 2);
+	//DrawDebugSphere(GetWorld(), moveLocationArr[destRow][destCol], 120, 8, FColor::Green, true, 1.0f, 0, 2);
 
 	MoveToLocation(mapGrid, make_pair(ROW / 2, COL / 2), make_pair(destRow, destCol));
 
@@ -197,6 +222,19 @@ pair<int,int> ABaseActor::findCoverLocation()
 			}
 		}
 		moveLocationArr.Emplace(va);
+
+		//for (int k = 0; k < ROW; k++) {
+		//	// 각 행을 순회할 때마다 새로운 FString을 시작합니다.
+		//	FString rowString;
+
+		//	for (int l = 0; l < COL; l++) {
+		//		// 각 열의 값을 rowString에 추가합니다.
+		//		rowString += FString::Printf(TEXT("%d, "), mapGrid[k][l]);
+		//	}
+
+		//	// 각 행의 마지막에서 로그를 출력합니다. 이럴 경우, 각 행이 별도의 로그 메시지로 출력됩니다.
+		//	UE_LOG(LogTemp, Warning, TEXT("%s"), *rowString);
+		//}
 	}
 
 	target = FindClosestTarget();
@@ -216,7 +254,7 @@ pair<int,int> ABaseActor::findCoverLocation()
 					xx = i, yy = j;
 				}
 				//UE_LOG(LogTemp, Log, TEXT("x : %f, y : %f, z : %f, dist : %f"), x + (100 * 2 * i), y + (100 * 2 * j), z, distance);
-				//DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Yellow, true, 1, 0, 2);
+				//DrawDebugSphere(GetWorld(), FVector(x + (100 * 2 * i), y + (100 * 2 * j), z), 100, 8, FColor::Yellow, true, 1.0f, 0, 2);
 
 			};
 		}

@@ -79,4 +79,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool move;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "FSMComponent")
+	class UEnemyFSM* fsm;
 };
