@@ -90,7 +90,7 @@ void ABaseActor::PathTracking(float DeltaTime)
 
 
 		// If the actor is close to the waypoint, move to the next waypoint
-		if (FVector::Distance(NewLocation, Waypoint) < 10.0f)
+		if (FVector::Distance(NewLocation, Waypoint) < 0.1f)
 		{
 			//currentWayPointIndex = (currentWayPointIndex + 1) % paths.Num();
 			currentWayPointIndex++;
@@ -237,6 +237,7 @@ pair<int,int> ABaseActor::findCoverLocation()
 		//}
 	}
 
+
 	target = FindClosestTarget();
 	int xx, yy;
 	double distance2Target=9999;
@@ -260,6 +261,10 @@ pair<int,int> ABaseActor::findCoverLocation()
 		}
 	}
 	UE_LOG(LogTemp, Log, TEXT("find cover location : %d,%d"), xx, yy);
+	UE_LOG(LogTemp, Log, TEXT("find cover location xy : %f,%f,%f"), moveLocationArr[yy][xx].X, moveLocationArr[yy][xx].Y, moveLocationArr[yy][xx].Z);
+	DrawDebugSphere(GetWorld(), moveLocationArr[yy][xx], 100, 8, FColor::Purple, true, 1.0f, 0, 2);
+
+
 	if (xx<-1 || xx>ROW || yy<-1 || yy>COL)//만약 숨을곳이 없다면
 	{
 		xx = ROW / 2, yy = COL / 2;
