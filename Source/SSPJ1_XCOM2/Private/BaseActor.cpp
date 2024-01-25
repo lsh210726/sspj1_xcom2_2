@@ -63,10 +63,14 @@ void ABaseActor::PathTracking(float DeltaTime)
 	{
 		// Get the current waypoint
 		FVector Waypoint = paths[currentWayPointIndex];
+		//DrawDebugSphere(GetWorld(), Waypoint, 100, 8, FColor::Green, true, 1.0f, 0, 2);
 
 		// Move the actor towards the waypoint
 		FVector NewLocation = FMath::VInterpConstantTo(GetActorLocation(), Waypoint, DeltaTime, 300.0f);
 		//SetActorLocation(NewLocation);
+
+		//FVector dir = Waypoint-GetActorLocation();
+		//dir.Normalize();
 
 
 		// 액터의 현재 위치를 가져옵니다.
@@ -179,6 +183,9 @@ void ABaseActor::MoveToLocation(int grid1[20][20], std::pair<int, int> src, std:
 		pathStack.pop();
 		UE_LOG(LogTemp, Warning, TEXT("-> (%d,%d) "), p.first, p.second);
 		paths.Emplace(moveLocationArr[p.first][p.second]);
+		UE_LOG(LogTemp, Warning, TEXT("-> (%f,%f) "), moveLocationArr[p.first][p.second].X, moveLocationArr[p.first][p.second].Y);
+		//DrawDebugSphere(GetWorld(), moveLocationArr[p.first][p.second], 100, 8, FColor::Green, true, 1.0f, 0, 2);
+
 	}
 	if (pathStack.empty())move = true;
 }
@@ -192,6 +199,7 @@ pair<int,int> ABaseActor::findCoverLocation()
 	z = GetActorLocation().Z;
 
 	int mapGrid[20][20];
+	moveLocationArr.Empty();
 
 	for (int i = 0; i < ROW; i++)
 	{
@@ -202,12 +210,21 @@ pair<int,int> ABaseActor::findCoverLocation()
 
 			FHitResult hr;
 
-			bool bIsHit = GetWorld()->SweepSingleByProfile(
+			//bool bIsHit = GetWorld()->SweepSingleByProfile(
+			//	hr,
+			//	FVector(x + (100 * 2 * i), y + (100 * 2 * j), z),
+			//	FVector(x + (100 * 2 * i), y + (100 * 2 * j), z),
+			//	FQuat::Identity,
+			//	TEXT("Pawn"),
+			//	FCollisionShape::MakeBox(FVector(100)),
+			//	FCollisionQueryParams(SCENE_QUERY_STAT(SweepSingle), true)
+			//);
+			bool bIsHit = GetWorld()->SweepSingleByChannel(
 				hr,
 				FVector(x + (100 * 2 * i), y + (100 * 2 * j), z),
 				FVector(x + (100 * 2 * i), y + (100 * 2 * j), z),
 				FQuat::Identity,
-				TEXT("Pawn"),
+				ECollisionChannel::ECC_Visibility,
 				FCollisionShape::MakeBox(FVector(100)),
 				FCollisionQueryParams(SCENE_QUERY_STAT(SweepSingle), true)
 			);
@@ -261,8 +278,9 @@ pair<int,int> ABaseActor::findCoverLocation()
 		}
 	}
 	UE_LOG(LogTemp, Log, TEXT("find cover location : %d,%d"), xx, yy);
-	UE_LOG(LogTemp, Log, TEXT("find cover location xy : %f,%f,%f"), moveLocationArr[yy][xx].X, moveLocationArr[yy][xx].Y, moveLocationArr[yy][xx].Z);
-	DrawDebugSphere(GetWorld(), moveLocationArr[yy][xx], 100, 8, FColor::Purple, true, 1.0f, 0, 2);
+	UE_LOG(LogTemp, Log, TEXT("find cover location Grid : %d"), mapGrid[xx][yy]);
+	UE_LOG(LogTemp, Log, TEXT("find cover location xy : %f,%f,%f"), moveLocationArr[xx][yy].X, moveLocationArr[xx][yy].Y, moveLocationArr[xx][yy].Z);
+	//DrawDebugSphere(GetWorld(), moveLocationArr[xx][yy], 110, 8, FColor::Purple, true, 1.0f, 0, 2);
 
 
 	if (xx<-1 || xx>ROW || yy<-1 || yy>COL)//만약 숨을곳이 없다면
